@@ -1,0 +1,51 @@
+#######################################
+# Syntax Coloring Map about Easyino library
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+Easy	KEYWORD1
+Easyino	KEYWORD1
+Easyino_Robot	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+
+#   per i robottini
+riceveQualcosa	KEYWORD2
+
+begin	KEYWORD2
+riceve_qualcosa	KEYWORD2
+codice_tessera	KEYWORD2
+taraTutto	KEYWORD2
+accendiFrecciaDestra	KEYWORD2
+accendiFrecciaSinistra	KEYWORD2
+luci_frontali	KEYWORD2
+luci_posteriori	KEYWORD2
+tag_riconosciuto	KEYWORD2
+vaiAvanti	KEYWORD2
+vaiIndietro	KEYWORD2
+giraDestra	KEYWORD2
+giraSinistra	KEYWORD2
+avanti	KEYWORD2
+indietro	KEYWORD2
+destra	KEYWORD2
+sinistra	KEYWORD2
+accendiFari	KEYWORD2
+
+######################################
+# Constants (LITERAL1)
+#######################################
+
+#elenco schede
+Alfa	LITERAL1
+Beta	LITERAL1
+Luigi	LITERAL1
+Catia	LITERAL1
+Robot	LITERAL1
+robot	LITERAL1
+
