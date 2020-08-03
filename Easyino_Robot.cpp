@@ -1190,7 +1190,7 @@ void animazione(int com, int durata, int vel) {
   if (com != -1) {
     int camb = lunghezza(com);
     boolean esci = false;
-    int millisIniziale = millis();
+    unsigned long int millisIniziale = millis();
     for (long int d = 0, v = 1 && esci == false; d < durata; d++) {
       if (d % vel == (int)((vel - 1) * v / camb)) {
         r1 = anim[com][(v - 1) * 2];
