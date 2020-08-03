@@ -1189,7 +1189,9 @@ int Easyino_Robot::codice_tessera() {
 void animazione(int com, int durata, int vel) {
   if (com != -1) {
     int camb = lunghezza(com);
-    for (long int d = 0, v = 1; d < durata; d++) {
+    boolean esci = false;
+    int millisIniziale = millis();
+    for (long int d = 0, v = 1 && esci == false; d < durata; d++) {
       if (d % vel == (int)((vel - 1) * v / camb)) {
         r1 = anim[com][(v - 1) * 2];
         r2 = anim[com][((v - 1) * 2) + 1];
@@ -1200,6 +1202,9 @@ void animazione(int com, int durata, int vel) {
         }
       }
       delay(1);
+      if (millis() - millisIniziale >= durata){
+        esci = true;
+      }
     }
     spegni_led();
     ferma_motori();
