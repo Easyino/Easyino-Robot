@@ -49,3 +49,5 @@ Catia	LITERAL1
 Robot	LITERAL1
 robot	LITERAL1
 
+facile	LITERAL1
+difficile	LITERAL1

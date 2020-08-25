@@ -75,9 +75,11 @@ int lunghezza(int com) {                            // Calcola la quantità di c
    Prepares the output pins.
 */
 int robot_name;
+bool isEasy;
 Easyino_Robot::Easyino_Robot(int r_n)
 {
   robot_name = r_n;
+  isEasy=r_n;
   _chipSelectPin = 10;
   _resetPowerDownPin = 9;
 }
@@ -1189,9 +1191,7 @@ int Easyino_Robot::codice_tessera() {
 void animazione(int com, int durata, int vel) {
   if (com != -1) {
     int camb = lunghezza(com);
-    boolean esci = false;
-    unsigned long int millisIniziale = millis();
-    for (long int d = 0, v = 1 && esci == false; d < durata; d++) {
+    for (long int d = 0, v = 1; d < durata; d++) {
       if (d % vel == (int)((vel - 1) * v / camb)) {
         r1 = anim[com][(v - 1) * 2];
         r2 = anim[com][((v - 1) * 2) + 1];
@@ -1202,16 +1202,14 @@ void animazione(int com, int durata, int vel) {
         }
       }
       delay(1);
-      if (millis() - millisIniziale >= durata){
-        esci = true;
-      }
     }
-    spegni_led();
-    ferma_motori();
+
   }
   else {
     delay(durata);
   }
+      spegni_led();
+    ferma_motori();
 }
 
 
@@ -1232,71 +1230,65 @@ void Easyino_Robot::tag_riconosciuto() {
   animazione(an, duranim[4], duranim[4]);
 }
 
-#define tempo_accelerazione 100
-void starter() {
-  for (int i = 0; i < 244; i += (255 / tempo_accelerazione)) {
-    analogWrite(3, i);
-    analogWrite(6, i);
-  }
-}
+
 
 void Easyino_Robot::vaiAvanti(int centimetri) {
+  if(isEasy)accendiFari();
   digitalWrite(A1, HIGH);
   digitalWrite(A3, LOW);
   digitalWrite(A2, HIGH);
   digitalWrite(A4, LOW);
-  starter();
+
   analogWrite(3, 255); // Ruota destra
   analogWrite(6, 235); // Ruota sinistra
-  animazione(an, (int)(kcm * centimetri - tempo_accelerazione), duranim[an]);
+  animazione(an, (int)(kcm * centimetri ), duranim[an]);
 }
 void Easyino_Robot::vaiAvanti() {
+
   digitalWrite(A1, HIGH);
   digitalWrite(A3, LOW);
   digitalWrite(A2, HIGH);
   digitalWrite(A4, LOW);
-  starter();
   analogWrite(3, 255); // Ruota destra
   analogWrite(6, 235); // Ruota sinistra
 }
 void Easyino_Robot::vaiIndietro(int centimetri) {
+    if(isEasy)accendiFari();
   digitalWrite(A1, LOW);
   digitalWrite(A3, HIGH);
   digitalWrite(A2, LOW);
   digitalWrite(A4, HIGH);
-  starter();
   analogWrite(3, 255);
   analogWrite(6, 235);
-  animazione(an, (int)(kcm * centimetri - tempo_accelerazione), duranim[an]);
+  animazione(an, (int)(kcm * centimetri ), duranim[an]);
 }
 void Easyino_Robot::giraDestra(int gradi) {
+    if(isEasy)accendiFrecciaDestra();
   digitalWrite(A1, HIGH);
   digitalWrite(A3, LOW);
   digitalWrite(A2, LOW);
   digitalWrite(A4, LOW);
-  starter();
   analogWrite(3, 255);
   analogWrite(6, 235);
-  animazione(an, (int)(kgr * gradi - tempo_accelerazione), duranim[an]);
+  animazione(an, (int)(kgr * gradi ), duranim[an]);
 }
 void Easyino_Robot::giraDestra() {
   digitalWrite(A1, HIGH);
   digitalWrite(A3, LOW);
   digitalWrite(A2, LOW);
   digitalWrite(A4, LOW);
-  starter();
   analogWrite(3, 255);
   analogWrite(6, 235);
 }
 void Easyino_Robot::giraSinistra(int gradi) {
+    if(isEasy)accendiFrecciaSinistra();
   digitalWrite(A1, LOW);
   digitalWrite(A3, LOW);
   digitalWrite(A2, HIGH);
   digitalWrite(A4, LOW);
-  starter();
   analogWrite(3, 255);
   analogWrite(6, 235);
-  animazione(an, (int)(kgr * gradi - tempo_accelerazione), duranim[an]);
+  animazione(an, (int)(kgr * gradi ), duranim[an]);
 }
 void Easyino_Robot::avanti(int centimetri) {
   luci_frontali();

@@ -18,6 +18,10 @@ enum vari_robot {
   luigi2 = 2,
   luigi3 = 3
 };
+enum modalita{
+  difficile=0,
+  facile=1
+}
 
 enum tessere {
   AVANTI = 1,
