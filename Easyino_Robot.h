@@ -21,13 +21,17 @@ enum vari_robot {
 enum modalita{
   difficile=0,
   facile=1
-}
+};
 
 enum tessere {
   AVANTI = 1,
   INDIETRO = 2,
   DESTRA = 3,
   SINISTRA = 4,
+  LUCI_ANTERIORI=5,
+  LUCI_POSTERIORI=6,
+  FRECCIA_DESTRA=7,
+  FRECCIA_SINISTRA=8,
   TARATURA = 10,
   TARAAVANTI = 11,
   TARAGIRA = 12
@@ -336,11 +340,13 @@ class Easyino_Robot {
     bool riceve_qualcosa();
     int codice_tessera();
     void taraTutto();
+    void taraPiuDestra();
+        void taraPiuSinistra();
     void accendiFrecciaDestra();
     void accendiFrecciaSinistra();
     void luci_frontali();
     void luci_posteriori();
-    void tag_riconosciuto();
+    void animazioneTagRiconosciuto();
     void vaiAvanti(int centimetri);
     void vaiAvanti();
     void vaiIndietro(int centimetri);
@@ -352,6 +358,8 @@ class Easyino_Robot {
     void destra(int gradi);
     void sinistra(int gradi);
     void accendiFari();
+    int kdx;
+    int ksx;
   private:
     byte _chipSelectPin;		// Arduino pin connected to Easyino_Robot's SPI slave select input (Pin 24, NSS, active low)
     byte _resetPowerDownPin;	// Arduino pin connected to Easyino_Robot's reset and power down input (Pin 6, NRSTPD, active low)

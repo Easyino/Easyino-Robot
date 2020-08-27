@@ -1,34 +1,37 @@
-#include <Easyino_Robot.h>
-Easyino_Robot robot(true);
+#include "Easyino_Robot.h"
+Easyino_Robot robot(false);
 void setup() {
   robot.begin();
-  digitalWrite(3, LOW);
-  digitalWrite(A3, LOW);
-  digitalWrite(4, LOW);
-  digitalWrite(A4, LOW);
-  robot.tag_riconosciuto();
 }
 
 void loop() {
+
   if (robot.riceve_qualcosa()) {
     Serial.println(robot.codice_tessera());
-    robot.tag_riconosciuto();
-    if (robot.codice_tessera() == AVANTI) {
-      robot.accendiFrecciaSinistra();
+    robot.animazioneTagRiconosciuto();
+    if (robot.codice_tessera() == DESTRA) {
+      robot.accendiFrecciaDestra();
       robot.giraDestra(90);
     }
-    else if (robot.codice_tessera() == 2) {
+    else if (robot.codice_tessera() == SINISTRA) {
       robot.accendiFrecciaSinistra();
       robot.giraSinistra(90);
     }
-    else if (robot.codice_tessera() == 3) {
+    else if (robot.codice_tessera() == AVANTI) {
       robot.luci_frontali();
       robot.vaiAvanti(100);
     }
-    else if (robot.codice_tessera() == 4) {
+    else if (robot.codice_tessera() == INDIETRO) {
       robot.luci_posteriori();
       robot.vaiIndietro(100);
     }
+    else if (robot.codice_tessera() == 229) {
+robot.taraPiuDestra();
+    }
+        else if (robot.codice_tessera() == 71) {
+robot.taraPiuSinistra();
+    }
+    
     else if (robot.codice_tessera() == 5) {
       robot.avanti(100);
       robot.sinistra(90); 
@@ -39,4 +42,8 @@ void loop() {
       robot.avanti(283);
     }
   }
+  Serial.print("\n kdx: ");
+  Serial.print(robot.kdx);
+  Serial.print("--- ksx: ");
+  Serial.print(robot.ksx);
 }
