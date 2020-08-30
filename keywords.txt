@@ -21,12 +21,16 @@ riceveQualcosa	KEYWORD2
 begin	KEYWORD2
 riceve_qualcosa	KEYWORD2
 codice_tessera	KEYWORD2
+
 taraTutto	KEYWORD2
+
 accendiFrecciaDestra	KEYWORD2
 accendiFrecciaSinistra	KEYWORD2
 luci_frontali	KEYWORD2
 luci_posteriori	KEYWORD2
-tag_riconosciuto	KEYWORD2
+animazioneTagRiconosciuto	KEYWORD2
+accendiFari	KEYWORD2
+
 vaiAvanti	KEYWORD2
 vaiIndietro	KEYWORD2
 giraDestra	KEYWORD2
@@ -35,7 +39,7 @@ avanti	KEYWORD2
 indietro	KEYWORD2
 destra	KEYWORD2
 sinistra	KEYWORD2
-accendiFari	KEYWORD2
+
 
 ######################################
 # Constants (LITERAL1)
@@ -51,3 +55,13 @@ robot	LITERAL1
 
 facile	LITERAL1
 difficile	LITERAL1
+
+AVANTI	LITERAL1
+INDIETRO	LITERAL1
+DESTRA	LITERAL1
+SINISTRA	LITERAL1
+LUCI_ANTERIORI	LITERAL1
+LUCI_POSTERIORI	LITERAL1
+FRECCIA_DESTRA	LITERAL1
+FRECCIA_SINISTRA	LITERAL1
+

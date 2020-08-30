@@ -1054,100 +1054,9 @@ bool Easyino_Robot::PICC_ReadCardSerial()
 /////////////////////////////////////////////////////////////////////////////////////
 // funzioni aggiunte da  noi
 /////////////////////////////////////////////////////////////////////////////////////
-bool  Easyino_Robot::riceve_qualcosa() {
-  if (  PICC_IsNewCardPresent()) {
-    if ( PICC_ReadCardSerial()) {
-      spegni_led();
-      g = 1;
-      return true;
-    }
-  }
-  g = (g + 1) % 50;
-  if (g == 0) {
-    if (f == 1) {
-      r1 = 0xE7;
-      r2 = 0x81;
-      registri();
-      f = 0;
-    }
-    else {
-      spegni_led();
-      f = 1;
-    }
-  }
-  return false;
-}
-
-void Easyino_Robot::taraTutto() {
-  int tempo_inizio, tempo_tarato, codice;
-  while (riceve_qualcosa()) {}
-  while (isTaratura) {
-    Serial.println("taratura");
-    if (riceve_qualcosa()) {
-      codice = codice_tessera();
-      switch (codice) {
-        case TARATURA:
-          isTaratura = false;
-          Serial.println("esco dalla taratura");
-          break;
-        case TARAAVANTI:
-          tempo_inizio = millis();
-          vaiAvanti();
-          while (!riceve_qualcosa()) {}
-          tempo_tarato = (millis() - tempo_inizio);
-          ferma_motori();
-          kcm = tempo_tarato / 200;
-          codice = 0;
-          EEPROM.update(0, kcm);
-          delay(1000);
-          Serial.println(tempo_tarato);
-          break;
-        case TARAGIRA:
-          tempo_inizio = millis();
-          giraDestra();
-          while (!riceve_qualcosa()) {}
-          tempo_tarato = (millis() - tempo_inizio);
-          ferma_motori();
-          kgr = tempo_tarato / 360;
-          codice = 0;
-          EEPROM.update(1, kgr);
-          delay(1000);
-          Serial.println(tempo_tarato);
-          break;
-      }
-    }
-  }
-}
-
-void Easyino_Robot::taraPiuDestra() {
-  if (ksx < 255) {
-    ksx++;
-  }
-  else {
-    kdx--;
-  }
-
-  EEPROM.write(2, kdx); //coeficente giro per ruota destra
-  EEPROM.write(3, ksx); //coeficente giro per ruota destra
-}
-
-
-void Easyino_Robot::taraPiuSinistra() {
-  if (kdx < 255) {
-    kdx++;
-  }
-  else {
-    ksx--;
-  }
-
-  EEPROM.write(2, kdx); //coeficente giro per ruota destra
-  EEPROM.write(3, ksx); //coeficente giro per ruota destra
-}
-
-
 void Easyino_Robot::begin() {
-#define SS_PIN 10
-#define RST_PIN 9
+  #define SS_PIN 10
+  #define RST_PIN 9
 
 
 
@@ -1191,9 +1100,29 @@ void Easyino_Robot::begin() {
   animazioneTagRiconosciuto();
 }
 
-
-
-
+bool  Easyino_Robot::riceve_qualcosa() {
+  if (  PICC_IsNewCardPresent()) {
+    if ( PICC_ReadCardSerial()) {
+      spegni_led();
+      g = 1;
+      return true;
+    }
+  }
+  g = (g + 1) % 50;
+  if (g == 0) {
+    if (f == 1) {
+      r1 = 0xE7;
+      r2 = 0x81;
+      registri();
+      f = 0;
+    }
+    else {
+      spegni_led();
+      f = 1;
+    }
+  }
+  return false;
+}
 
 #define ntessere 12
 int tag[3][ntessere] {  //avanti - indietro - destra - sinistra - luci_davanti - luci_dietro - luci_dx - luci_sx
@@ -1201,14 +1130,20 @@ int tag[3][ntessere] {  //avanti - indietro - destra - sinistra - luci_davanti -
   {7, 23, 197, 213, 164, 247, 148, 37},
   {39, 135, 117, 21, 167, 181, 133, 20}
 };
-
-
 int Easyino_Robot::codice_tessera() {
 
   // for (byte i = 0; i < uid.size; i++) {
   // codice += uid.uidByte[0] < 0x10 ? " 0" : " ";
   int  codice = uid.uidByte[0];
   // }
+
+     if (codice == TARADESTRA) {
+       taraPiuDestra();
+    }
+        else if (codice() == TARASINISTRA) {
+          taraPiuSinistra();
+    }
+
   PICC_HaltA();
   PCD_StopCrypto1();
   for (int r = 0; r < 3; r++) {
@@ -1220,6 +1155,100 @@ int Easyino_Robot::codice_tessera() {
   }
   return codice;
 }
+
+
+
+
+
+void Easyino_Robot::taraTutto() {
+  int tempo_inizio, tempo_tarato, codice;
+  while (riceve_qualcosa()) {}
+  while (isTaratura) {
+    Serial.println("taratura");
+    if (riceve_qualcosa()) {
+      codice = codice_tessera();
+      switch (codice) {
+        case TARATURA:
+          isTaratura = false;
+          Serial.println("esco dalla taratura");
+          break;
+        case TARAAVANTI:
+          tempo_inizio = millis();
+          vaiAvantiPerTaratura();
+          while (!riceve_qualcosa()) {}
+          tempo_tarato = (millis() - tempo_inizio);
+          ferma_motori();
+          kcm = tempo_tarato / 200;
+          codice = 0;
+          EEPROM.update(0, kcm);
+          delay(1000);
+          Serial.println(tempo_tarato);
+          break;
+        case TARAGIRA:
+          tempo_inizio = millis();
+          giraDestraPerTaratura();
+          while (!riceve_qualcosa()) {}
+          tempo_tarato = (millis() - tempo_inizio);
+          ferma_motori();
+          kgr = tempo_tarato / 360;
+          codice = 0;
+          EEPROM.update(1, kgr);
+          delay(1000);
+          Serial.println(tempo_tarato);
+          break;
+      }
+    }
+  }
+}
+
+void Easyino_Robot::taraPiuDestra() {
+  if (ksx < 255) {
+    ksx++;
+  }
+  else {
+    kdx--;
+  }
+
+  EEPROM.write(2, kdx); //coeficente giro per ruota destra
+  EEPROM.write(3, ksx); //coeficente giro per ruota destra
+}
+
+
+void Easyino_Robot::taraPiuSinistra() {
+  if (kdx < 255) {
+    kdx++;
+  }
+  else {
+    ksx--;
+  }
+
+  EEPROM.write(2, kdx); //coeficente giro per ruota destra
+  EEPROM.write(3, ksx); //coeficente giro per ruota destra
+}
+
+void Easyino_Robot::vaiAvantiPerTaratura() {
+
+  digitalWrite(A1, HIGH);
+  digitalWrite(A3, LOW);
+  digitalWrite(A2, HIGH);
+  digitalWrite(A4, LOW);
+  analogWrite(3, kdx); // Ruota destra
+  analogWrite(6, ksx); // Ruota sinistra
+}
+
+void Easyino_Robot::giraDestraPerTaratura() {
+  digitalWrite(A1, HIGH);
+  digitalWrite(A3, LOW);
+  digitalWrite(A2, LOW);
+  digitalWrite(A4, LOW);
+  analogWrite(3, kdx); // Ruota destra
+  analogWrite(6, ksx); // Ruota sinistra
+}
+
+
+
+
+
 
 void animazione(int com, int durata, int vel) {
   if (com != -1) {
@@ -1244,8 +1273,6 @@ void animazione(int com, int durata, int vel) {
   spegni_led();
   ferma_motori();
 }
-
-
 void Easyino_Robot::accendiFrecciaDestra() {
   an = 0;
 }
@@ -1262,6 +1289,9 @@ void Easyino_Robot::animazioneTagRiconosciuto() {
   an = 4;
   animazione(an, duranim[4], duranim[4]);
 }
+void Easyino_Robot::accendiFari() {
+  luci_frontali();
+}
 
 
 
@@ -1277,13 +1307,15 @@ void Easyino_Robot::vaiAvanti(int centimetri) {
   animazione(an, (int)(kcm * centimetri ), duranim[an]);
 }
 void Easyino_Robot::vaiAvanti() {
-
+  if (isEasy)accendiFari();
   digitalWrite(A1, HIGH);
   digitalWrite(A3, LOW);
   digitalWrite(A2, HIGH);
   digitalWrite(A4, LOW);
+
   analogWrite(3, kdx); // Ruota destra
   analogWrite(6, ksx); // Ruota sinistra
+  animazione(an, (int)(kcm * 100 ), duranim[an]);
 }
 void Easyino_Robot::vaiIndietro(int centimetri) {
   if (isEasy)accendiFari();
@@ -1294,6 +1326,16 @@ void Easyino_Robot::vaiIndietro(int centimetri) {
   analogWrite(3, kdx); // Ruota destra
   analogWrite(6, ksx); // Ruota sinistra
   animazione(an, (int)(kcm * centimetri ), duranim[an]);
+}
+void Easyino_Robot::vaiIndietro() {
+  if (isEasy)accendiFari();
+  digitalWrite(A1, LOW);
+  digitalWrite(A3, HIGH);
+  digitalWrite(A2, LOW);
+  digitalWrite(A4, HIGH);
+  analogWrite(3, kdx); // Ruota destra
+  analogWrite(6, ksx); // Ruota sinistra
+  animazione(an, (int)(kcm * 100 ), duranim[an]);
 }
 void Easyino_Robot::giraDestra(int gradi) {
   if (isEasy)accendiFrecciaDestra();
@@ -1306,12 +1348,14 @@ void Easyino_Robot::giraDestra(int gradi) {
   animazione(an, (int)(kgr * gradi ), duranim[an]);
 }
 void Easyino_Robot::giraDestra() {
+  if (isEasy)accendiFrecciaDestra();
   digitalWrite(A1, HIGH);
   digitalWrite(A3, LOW);
   digitalWrite(A2, LOW);
   digitalWrite(A4, LOW);
   analogWrite(3, kdx); // Ruota destra
   analogWrite(6, ksx); // Ruota sinistra
+  animazione(an, (int)(kgr * 90 ), duranim[an]);
 }
 void Easyino_Robot::giraSinistra(int gradi) {
   if (isEasy)accendiFrecciaSinistra();
@@ -1323,6 +1367,19 @@ void Easyino_Robot::giraSinistra(int gradi) {
   analogWrite(6, ksx); // Ruota sinistra
   animazione(an, (int)(kgr * gradi ), duranim[an]);
 }
+void Easyino_Robot::giraSinistra() {
+  if (isEasy)accendiFrecciaSinistra();
+  digitalWrite(A1, LOW);
+  digitalWrite(A3, LOW);
+  digitalWrite(A2, HIGH);
+  digitalWrite(A4, LOW);
+  analogWrite(3, kdx); // Ruota destra
+  analogWrite(6, ksx); // Ruota sinistra
+  animazione(an, (int)(kgr * 90 ), duranim[an]);
+}
+
+
+
 void Easyino_Robot::avanti(int centimetri) {
   luci_frontali();
   vaiAvanti(centimetri);
@@ -1340,6 +1397,4 @@ void Easyino_Robot::sinistra(int gradi) {
   giraSinistra(gradi);
 }
 
-void Easyino_Robot::accendiFari() {
-  luci_frontali();
-}
+

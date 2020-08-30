@@ -34,7 +34,9 @@ enum tessere {
   FRECCIA_SINISTRA=8,
   TARATURA = 10,
   TARAAVANTI = 11,
-  TARAGIRA = 12
+  TARAGIRA = 12,
+  TARADESTRA=229,
+  TARASINISTRA=71
 };
 
 const byte Easyino_Robot_firmware_referenceV0_0[] PROGMEM = {
@@ -339,25 +341,33 @@ class Easyino_Robot {
     void begin();
     bool riceve_qualcosa();
     int codice_tessera();
+
     void taraTutto();
     void taraPiuDestra();
-        void taraPiuSinistra();
+    void taraPiuSinistra();
+    void vaiAvantiPerTaratura();
+    void giraDestraPerTaratura();
+
     void accendiFrecciaDestra();
     void accendiFrecciaSinistra();
     void luci_frontali();
     void luci_posteriori();
     void animazioneTagRiconosciuto();
+    void accendiFari();
+    
     void vaiAvanti(int centimetri);
     void vaiAvanti();
     void vaiIndietro(int centimetri);
+    void vaiIndietro();
     void giraDestra(int gradi);
-     void giraDestra();
+    void giraDestra();
     void giraSinistra(int gradi);
+    void giraSinistra();
     void avanti(int centimetri);
     void indietro(int centimetri);
     void destra(int gradi);
     void sinistra(int gradi);
-    void accendiFari();
+
     int kdx;
     int ksx;
   private:
