@@ -1140,7 +1140,7 @@ int Easyino_Robot::codice_tessera() {
      if (codice == TARADESTRA) {
        taraPiuDestra();
     }
-        else if (codice() == TARASINISTRA) {
+        else if (codice == TARASINISTRA) {
           taraPiuSinistra();
     }
 
