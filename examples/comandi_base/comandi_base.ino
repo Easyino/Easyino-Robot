@@ -1,5 +1,5 @@
 #include "Easyino_Robot.h"
-Easyino_Robot robot(difficile);
+Easyino_Robot robot(facile);
 void setup() {
   robot.begin();
 }
