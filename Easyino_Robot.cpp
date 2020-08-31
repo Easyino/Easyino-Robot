@@ -38,6 +38,8 @@ const int latchpin = 7;
 const int datapin = 4;
 unsigned long int kcm = 0;
 unsigned long int kgr = 0;
+int tempo_inizio;
+int tempo_tarato;
 void registri() {
   digitalWrite(latchpin, LOW);
   shiftOut(datapin, clockpin, MSBFIRST, r1);
@@ -1055,8 +1057,8 @@ bool Easyino_Robot::PICC_ReadCardSerial()
 // funzioni aggiunte da  noi
 /////////////////////////////////////////////////////////////////////////////////////
 void Easyino_Robot::begin() {
-  #define SS_PIN 10
-  #define RST_PIN 9
+#define SS_PIN 10
+#define RST_PIN 9
 
 
 
@@ -1091,8 +1093,6 @@ void Easyino_Robot::begin() {
   ksx = EEPROM.read(3); //coeficente giro per ruota destra
 
   Serial.println(F("ciao, io sono pronto... e tu brutto strunz? \nappoggia una carta o esploderò tra 10 secondi."));
-  if (riceve_qualcosa() && codice_tessera() == TARATURA)isTaratura = true;
-  taraTutto();
   digitalWrite(3, LOW);
   digitalWrite(A3, LOW);
   digitalWrite(4, LOW);
@@ -1101,34 +1101,64 @@ void Easyino_Robot::begin() {
 }
 
 bool  Easyino_Robot::riceve_qualcosa() {
-  if (  PICC_IsNewCardPresent()) {
-    if ( PICC_ReadCardSerial()) {
+  if (PICC_IsNewCardPresent()) {
+    if (PICC_ReadCardSerial()) {
       spegni_led();
       g = 1;
       return true;
     }
   }
-  g = (g + 1) % 50;
-  if (g == 0) {
-    if (f == 1) {
-      r1 = 0xE7;
-      r2 = 0x81;
-      registri();
-      f = 0;
+  if (an == -1) {
+    g = (g + 1) % 50;
+    if (g == 0) {
+      if (f == 1) {
+        r1 = 0xE7;
+        r2 = 0x81;
+        registri();
+        f = 0;
+      }
+      else {
+        spegni_led();
+        f = 1;
+      }
     }
-    else {
-      spegni_led();
-      f = 1;
+  }
+  else {
+    switch (an) {
+      case 0: {
+          r1 = 0x07;
+          r2 = 0x80;
+          registri();
+          break;
+        }
+      case 1: {
+          r1 = 0xE0;
+          r2 = 0x01;
+          registri();
+          break;
+        }
+      case 2: {
+          r1 = 0x18;
+          r2 = 0x00;
+          registri();
+          break;
+        }
+      case 3: {
+          r1 = 0x00;
+          r2 = 0x7E;
+          registri();
+          break;
+        }
     }
   }
   return false;
 }
 
-#define ntessere 12
-int tag[3][ntessere] {  //avanti - indietro - destra - sinistra - luci_davanti - luci_dietro - luci_dx - luci_sx
-  {5, 119, 52, 213, 103, 36, 87, 165, 0, 148, 32, 216},
-  {7, 23, 197, 213, 164, 247, 148, 37},
-  {39, 135, 117, 21, 167, 181, 133, 20}
+#define ntessere 14
+int tag[3][ntessere] {  //avanti - indietro - destra - sinistra - luci_dx - luci_sx - luci_davanti - luci_dietro
+  {5, 119, 52, 213, 87, 165, 103, 36, 0, 148, 32, 216, 0, 71},
+  {7, 23, 197, 213, 7, 37, 196, 164, 24, 0, 181, 229, 132, 135},
+  {39, 247, 117, 21, 133, 20, 167, 0,}
 };
 int Easyino_Robot::codice_tessera() {
 
@@ -1137,97 +1167,121 @@ int Easyino_Robot::codice_tessera() {
   int  codice = uid.uidByte[0];
   // }
 
-     if (codice == TARADESTRA) {
-       taraPiuDestra();
-    }
-        else if (codice == TARASINISTRA) {
-          taraPiuSinistra();
-    }
-
   PICC_HaltA();
   PCD_StopCrypto1();
   for (int r = 0; r < 3; r++) {
     for (int c = 0; c < ntessere; c++) {
       if (tag[r][c] == codice) {
-        return c + 1;
+        switch (c) {
+          case TARATURA: {
+              Serial.print("Tessera n° ");
+              Serial.print(codice);
+              Serial.print(" -> ");
+              Serial.println(c);
+              return c;
+              break;
+            }
+          case TARAAVANTI: {
+              Serial.print("Tessera n° ");
+              Serial.print(codice);
+              Serial.print(" -> ");
+              Serial.println(c);
+              tempo_inizio = millis();
+              vaiAvantiTaratura();
+              while (!riceve_qualcosa()) {}
+              tempo_tarato = (millis() - tempo_inizio);
+              ferma_motori();
+              kcm = tempo_tarato / 200;
+              codice = 0;
+              EEPROM.update(0, kcm);
+              delay(1000);
+              if (kcm > 255) {
+                animazioneTagRiconosciuto(2);
+                Serial.println("Errore taratura: costante troppo grande per la EEPROM");
+              }
+              else {
+                Serial.println(tempo_tarato);
+              }
+              codice = -1;
+              return c;
+              break;
+            }
+          case TARAGIRA: {
+              Serial.print("Tessera n° ");
+              Serial.print(codice);
+              Serial.print(" -> ");
+              Serial.println(c);
+              tempo_inizio = millis();
+              giraDestraTaratura();
+              while (!riceve_qualcosa()) {}
+              tempo_tarato = (millis() - tempo_inizio);
+              ferma_motori();
+              kgr = tempo_tarato / 360;
+              codice = 0;
+              EEPROM.update(1, kgr);
+              delay(1000);
+              if (kcm > 255) {
+                animazioneTagRiconosciuto(2);
+                Serial.println("Errore taratura: costante troppo grande per la EEPROM");
+              }
+              else {
+                Serial.println(tempo_tarato);
+              }
+              codice = -1;
+              return c;
+              break;
+            }
+          case PIUDESTRA: {
+              Serial.print("Tessera n° ");
+              Serial.print(codice);
+              Serial.print(" -> ");
+              Serial.println(c);
+              if (ksx < 255) {
+                ksx++;
+                EEPROM.write(3, ksx); //coeficente giro per ruota destra
+              }
+              else {
+                kdx--;
+                EEPROM.write(2, kdx); //coeficente giro per ruota destra
+              }
+              return c;
+              break;
+            }
+          case PIUSINISTRA: {
+              Serial.print("Tessera n° ");
+              Serial.print(codice);
+              Serial.print(" -> ");
+              Serial.println(c);
+              if (kdx < 255) {
+                kdx++;
+                EEPROM.write(2, kdx); //coeficente giro per ruota destra
+              }
+              else {
+                ksx--;
+                EEPROM.write(3, ksx); //coeficente giro per ruota destra
+              }
+              return c;
+              break;
+            }
+          default : {
+              Serial.print("Tessera n° ");
+              Serial.print(codice);
+              Serial.print(" -> ");
+              Serial.println(c);
+              return c;
+              break;
+            }
+        }
       }
     }
   }
+  Serial.print("Tessera n° ");
+  Serial.println(codice);
   return codice;
 }
 
 
-
-
-
-void Easyino_Robot::taraTutto() {
-  int tempo_inizio, tempo_tarato, codice;
-  while (riceve_qualcosa()) {}
-  while (isTaratura) {
-    Serial.println("taratura");
-    if (riceve_qualcosa()) {
-      codice = codice_tessera();
-      switch (codice) {
-        case TARATURA:
-          isTaratura = false;
-          Serial.println("esco dalla taratura");
-          break;
-        case TARAAVANTI:
-          tempo_inizio = millis();
-          vaiAvantiPerTaratura();
-          while (!riceve_qualcosa()) {}
-          tempo_tarato = (millis() - tempo_inizio);
-          ferma_motori();
-          kcm = tempo_tarato / 200;
-          codice = 0;
-          EEPROM.update(0, kcm);
-          delay(1000);
-          Serial.println(tempo_tarato);
-          break;
-        case TARAGIRA:
-          tempo_inizio = millis();
-          giraDestraPerTaratura();
-          while (!riceve_qualcosa()) {}
-          tempo_tarato = (millis() - tempo_inizio);
-          ferma_motori();
-          kgr = tempo_tarato / 360;
-          codice = 0;
-          EEPROM.update(1, kgr);
-          delay(1000);
-          Serial.println(tempo_tarato);
-          break;
-      }
-    }
-  }
-}
-
-void Easyino_Robot::taraPiuDestra() {
-  if (ksx < 255) {
-    ksx++;
-  }
-  else {
-    kdx--;
-  }
-
-  EEPROM.write(2, kdx); //coeficente giro per ruota destra
-  EEPROM.write(3, ksx); //coeficente giro per ruota destra
-}
-
-
-void Easyino_Robot::taraPiuSinistra() {
-  if (kdx < 255) {
-    kdx++;
-  }
-  else {
-    ksx--;
-  }
-
-  EEPROM.write(2, kdx); //coeficente giro per ruota destra
-  EEPROM.write(3, ksx); //coeficente giro per ruota destra
-}
-
-void Easyino_Robot::vaiAvantiPerTaratura() {
-
+void Easyino_Robot::vaiAvantiTaratura() {
   digitalWrite(A1, HIGH);
   digitalWrite(A3, LOW);
   digitalWrite(A2, HIGH);
@@ -1236,7 +1290,7 @@ void Easyino_Robot::vaiAvantiPerTaratura() {
   analogWrite(6, ksx); // Ruota sinistra
 }
 
-void Easyino_Robot::giraDestraPerTaratura() {
+void Easyino_Robot::giraDestraTaratura() {
   digitalWrite(A1, HIGH);
   digitalWrite(A3, LOW);
   digitalWrite(A2, LOW);
@@ -1279,24 +1333,24 @@ void Easyino_Robot::accendiFrecciaDestra() {
 void Easyino_Robot::accendiFrecciaSinistra() {
   an = 1;
 }
-void Easyino_Robot::luci_frontali() {
+void Easyino_Robot::luciFrontali() {
   an = 2;
 }
-void Easyino_Robot::luci_posteriori() {
+void Easyino_Robot::luciPosteriori() {
   an = 3;
 }
-void Easyino_Robot::animazioneTagRiconosciuto() {
+void Easyino_Robot::animazioneTagRiconosciuto(int cicli) {
   an = 4;
-  animazione(an, duranim[4], duranim[4]);
+  animazione(an, duranim[an], duranim[an * cicli]);
 }
-void Easyino_Robot::accendiFari() {
-  luci_frontali();
+void Easyino_Robot::animazioneTagRiconosciuto() {
+  animazioneTagRiconosciuto(1);
 }
 
 
 
 void Easyino_Robot::vaiAvanti(int centimetri) {
-  if (isEasy)accendiFari();
+  if (isEasy)luciFrontali();
   digitalWrite(A1, HIGH);
   digitalWrite(A3, LOW);
   digitalWrite(A2, HIGH);
@@ -1307,18 +1361,10 @@ void Easyino_Robot::vaiAvanti(int centimetri) {
   animazione(an, (int)(kcm * centimetri ), duranim[an]);
 }
 void Easyino_Robot::vaiAvanti() {
-  if (isEasy)accendiFari();
-  digitalWrite(A1, HIGH);
-  digitalWrite(A3, LOW);
-  digitalWrite(A2, HIGH);
-  digitalWrite(A4, LOW);
-
-  analogWrite(3, kdx); // Ruota destra
-  analogWrite(6, ksx); // Ruota sinistra
-  animazione(an, (int)(kcm * 100 ), duranim[an]);
+  vaiAvanti(100);
 }
 void Easyino_Robot::vaiIndietro(int centimetri) {
-  if (isEasy)accendiFari();
+  if (isEasy)luciPosteriori();
   digitalWrite(A1, LOW);
   digitalWrite(A3, HIGH);
   digitalWrite(A2, LOW);
@@ -1328,14 +1374,7 @@ void Easyino_Robot::vaiIndietro(int centimetri) {
   animazione(an, (int)(kcm * centimetri ), duranim[an]);
 }
 void Easyino_Robot::vaiIndietro() {
-  if (isEasy)accendiFari();
-  digitalWrite(A1, LOW);
-  digitalWrite(A3, HIGH);
-  digitalWrite(A2, LOW);
-  digitalWrite(A4, HIGH);
-  analogWrite(3, kdx); // Ruota destra
-  analogWrite(6, ksx); // Ruota sinistra
-  animazione(an, (int)(kcm * 100 ), duranim[an]);
+  vaiIndietro(100);
 }
 void Easyino_Robot::giraDestra(int gradi) {
   if (isEasy)accendiFrecciaDestra();
@@ -1348,14 +1387,7 @@ void Easyino_Robot::giraDestra(int gradi) {
   animazione(an, (int)(kgr * gradi ), duranim[an]);
 }
 void Easyino_Robot::giraDestra() {
-  if (isEasy)accendiFrecciaDestra();
-  digitalWrite(A1, HIGH);
-  digitalWrite(A3, LOW);
-  digitalWrite(A2, LOW);
-  digitalWrite(A4, LOW);
-  analogWrite(3, kdx); // Ruota destra
-  analogWrite(6, ksx); // Ruota sinistra
-  animazione(an, (int)(kgr * 90 ), duranim[an]);
+  giraDestra(90);
 }
 void Easyino_Robot::giraSinistra(int gradi) {
   if (isEasy)accendiFrecciaSinistra();
@@ -1368,24 +1400,17 @@ void Easyino_Robot::giraSinistra(int gradi) {
   animazione(an, (int)(kgr * gradi ), duranim[an]);
 }
 void Easyino_Robot::giraSinistra() {
-  if (isEasy)accendiFrecciaSinistra();
-  digitalWrite(A1, LOW);
-  digitalWrite(A3, LOW);
-  digitalWrite(A2, HIGH);
-  digitalWrite(A4, LOW);
-  analogWrite(3, kdx); // Ruota destra
-  analogWrite(6, ksx); // Ruota sinistra
-  animazione(an, (int)(kgr * 90 ), duranim[an]);
+  giraSinistra(90);
 }
 
 
 
 void Easyino_Robot::avanti(int centimetri) {
-  luci_frontali();
+  luciFrontali();
   vaiAvanti(centimetri);
 }
 void Easyino_Robot::indietro(int centimetri) {
-  luci_posteriori();
+  luciPosteriori();
   vaiIndietro(centimetri);
 }
 void Easyino_Robot::destra(int gradi) {
@@ -1396,5 +1421,3 @@ void Easyino_Robot::sinistra(int gradi) {
   accendiFrecciaSinistra();
   giraSinistra(gradi);
 }
-
-

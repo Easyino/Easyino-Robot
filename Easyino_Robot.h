@@ -19,24 +19,25 @@ enum vari_robot {
   luigi3 = 3
 };
 enum modalita{
-  difficile=0,
-  facile=1
+  difficile = 0,
+  facile = 1
 };
 
 enum tessere {
-  AVANTI = 1,
-  INDIETRO = 2,
-  DESTRA = 3,
-  SINISTRA = 4,
-  LUCI_ANTERIORI=5,
-  LUCI_POSTERIORI=6,
-  FRECCIA_DESTRA=7,
-  FRECCIA_SINISTRA=8,
-  TARATURA = 10,
-  TARAAVANTI = 11,
-  TARAGIRA = 12,
-  TARADESTRA=229,
-  TARASINISTRA=71
+  AVANTI,
+  INDIETRO,
+  DESTRA,
+  SINISTRA,
+  LUCI_ANTERIORI,
+  LUCI_POSTERIORI,
+  FRECCIA_DESTRA,
+  FRECCIA_SINISTRA,
+  COMANDO_NON_DEFINITO,
+  TARATURA,
+  TARAAVANTI,
+  TARAGIRA,
+  PIUDESTRA,
+  PIUSINISTRA
 };
 
 const byte Easyino_Robot_firmware_referenceV0_0[] PROGMEM = {
@@ -88,7 +89,7 @@ const byte FM17522_firmware_reference[] PROGMEM = {
 
 class Easyino_Robot {
   public:
-  bool isTaratura = false;
+  bool esci = false;
   
 
 
@@ -342,18 +343,18 @@ class Easyino_Robot {
     bool riceve_qualcosa();
     int codice_tessera();
 
-    void taraTutto();
-    void taraPiuDestra();
-    void taraPiuSinistra();
-    void vaiAvantiPerTaratura();
-    void giraDestraPerTaratura();
+//    void taraTutto();
+//    void taraPiuDestra();
+//    void taraPiuSinistra();
+    void vaiAvantiTaratura();
+    void giraDestraTaratura();
 
     void accendiFrecciaDestra();
     void accendiFrecciaSinistra();
-    void luci_frontali();
-    void luci_posteriori();
+    void luciFrontali();
+    void luciPosteriori();
+    void animazioneTagRiconosciuto(int cicli);
     void animazioneTagRiconosciuto();
-    void accendiFari();
     
     void vaiAvanti(int centimetri);
     void vaiAvanti();
