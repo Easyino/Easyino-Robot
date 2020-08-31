@@ -25,6 +25,18 @@ void loop() {
       robot.giraSinistra();
     }
 
+    if (robot.codice_tessera() == DESTRA_45) {
+      robot.giraDestra(45);
+    }
+    
+    if (robot.codice_tessera() == SINISTRA_45) {
+      robot.giraSinistra(45);
+    }
+    
+    if (robot.codice_tessera() == GIRO_COMPLETO) {
+      robot.giraSinistra(360);
+    }
+
     if (robot.codice_tessera() == LUCI_ANTERIORI) {
       robot.luciFrontali();
     }
