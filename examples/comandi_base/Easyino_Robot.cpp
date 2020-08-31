@@ -1156,9 +1156,9 @@ bool  Easyino_Robot::riceve_qualcosa() {
 
 #define ntessere 14
 int tag[3][ntessere] {  //avanti - indietro - destra - sinistra - luci_dx - luci_sx - luci_davanti - luci_dietro
-  {5, 119, 52, 213, 87, 165, 103, 36, 0, 148, 32, 216, 0, 71},
-  {7, 23, 197, 213, 7, 37, 196, 164, 24, 0, 181, 229, 132, 135},
-  {39, 247, 117, 21, 133, 20, 167, 0,}
+  {5, 119, 52, 213, 87, 165, 103, 36, 0, 0, 0, 0, 0, 0},
+  {7, 23, 197, 213, 148, 37, 196, 164, 24, 0, 181, 229, 132, 228}, //135
+  {39, 135, 117, 21, 133, 20, 167, 0,}
 };
 int Easyino_Robot::codice_tessera() {
 
