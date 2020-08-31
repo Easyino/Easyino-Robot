@@ -1328,6 +1328,13 @@ void animazione(int com, int durata, int vel) {
     spegni_led();
     ferma_motori();
   }
+  else{
+  r1 = 0;
+  r2 = 0;
+  registri();
+  }
+  Serial.print("Animazione n° ");
+  Serial.println(an);
 }
 void Easyino_Robot::accendiFrecciaDestra() {
   an = 0;
