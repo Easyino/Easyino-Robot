@@ -1,5 +1,5 @@
 #include "Easyino_Robot.h"
-Easyino_Robot robot(facile);
+Easyino_Robot robot(difficile);
 void setup() {
   robot.begin();
 }
@@ -9,25 +9,36 @@ void loop() {
   if (robot.riceve_qualcosa()) {
     robot.animazioneTagRiconosciuto();
 
-     if (robot.codice_tessera() == AVANTI) {
-      robot.luciFrontali();
+    if (robot.codice_tessera() == AVANTI) {
       robot.vaiAvanti();
     }
 
-     if (robot.codice_tessera() == INDIETRO) {
-      robot.luciPosteriori();
+    if (robot.codice_tessera() == INDIETRO) {
       robot.vaiIndietro();
     }
 
     if (robot.codice_tessera() == DESTRA) {
-      robot.accendiFrecciaDestra();
       robot.giraDestra();
     }
 
-     if (robot.codice_tessera() == SINISTRA) {
-      robot.accendiFrecciaSinistra();
+    if (robot.codice_tessera() == SINISTRA) {
       robot.giraSinistra();
     }
 
+    if (robot.codice_tessera() == LUCI_ANTERIORI) {
+      robot.luciFrontali();
+    }
+
+    if (robot.codice_tessera() == LUCI_POSTERIORI) {
+      robot.luciPosteriori();
+    }
+
+    if (robot.codice_tessera() == FRECCIA_DESTRA) {
+      robot.accendiFrecciaDestra();
+    }
+
+    if (robot.codice_tessera() == FRECCIA_SINISTRA) {
+      robot.accendiFrecciaSinistra();
+    }
   }
 }

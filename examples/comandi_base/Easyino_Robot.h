@@ -19,8 +19,8 @@ enum vari_robot {
   luigi3 = 3
 };
 enum modalita{
-  difficile = 0,
-  facile = 1
+  difficile,
+  facile
 };
 
 enum tessere {

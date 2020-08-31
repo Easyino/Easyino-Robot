@@ -1126,26 +1126,26 @@ bool  Easyino_Robot::riceve_qualcosa() {
   else {
     switch (an) {
       case 0: {
-          r1 = 0x07;
-          r2 = 0x80;
-          registri();
-          break;
-        }
-      case 1: {
-          r1 = 0xE0;
-          r2 = 0x01;
-          registri();
-          break;
-        }
-      case 2: {
           r1 = 0x18;
           r2 = 0x00;
           registri();
           break;
         }
-      case 3: {
+      case 1: {
           r1 = 0x00;
           r2 = 0x7E;
+          registri();
+          break;
+        }
+      case 2: {
+          r1 = 0x07;
+          r2 = 0x80;
+          registri();
+          break;
+        }
+      case 3: {
+          r1 = 0xE0;
+          r2 = 0x01;
           registri();
           break;
         }
@@ -1324,8 +1324,10 @@ void animazione(int com, int durata, int vel) {
   else {
     delay(durata);
   }
-  spegni_led();
-  ferma_motori();
+  if (com != 4) {
+    spegni_led();
+    ferma_motori();
+  }
 }
 void Easyino_Robot::accendiFrecciaDestra() {
   an = 0;
@@ -1340,8 +1342,7 @@ void Easyino_Robot::luciPosteriori() {
   an = 3;
 }
 void Easyino_Robot::animazioneTagRiconosciuto(int cicli) {
-  an = 4;
-  animazione(an, duranim[an], duranim[an * cicli]);
+  animazione(4, duranim[4], duranim[4]* cicli);
 }
 void Easyino_Robot::animazioneTagRiconosciuto() {
   animazioneTagRiconosciuto(1);
