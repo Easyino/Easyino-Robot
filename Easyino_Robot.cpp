@@ -23,8 +23,17 @@ const byte anim[5][15] {
   {0x20, 0x00, 0x60, 0x01, 0xE0, 0x01, 0xFF},
   {0x18, 0x00, 0x18, 0x00, 0xFF},
   {0x00, 0x3C, 0x00, 0x7E, 0xFF},
-  {0x10, 0xC3, 0x08, 0x66, 0x10, 0x3C, 0x08, 0x18, 0x10, 0x66, 0x08, 0xC3, 0x10, 0xC3, 0xFF}
+  {0x18, 0x18, 0x024, 0x24, 0x42, 0x42, 0x81, 0x81, 0x42, 0x42, 0x24, 0x24, 0x18, 0x18, 0xFF}
 };
+#define ntessere 16
+int tag[3][ntessere] {  //avanti - indietro - destra - sinistra - luci_dx - luci_sx - luci_davanti - luci_dietro 
+  {5, 119, 52, 213, 87, 165, 103, 231, 69, 85, 116},
+  {7, 23, 197, 213, 148, 37, 164, 196, 71, 101, 149,             181, 229, 132, 228},
+  {39, 135, 117, 21, 133, 20, 167, 247, 84, 100, 215 }
+};
+// gira destra 45° 69 71 84
+// gira sinistra 45° 85 101 100
+//gira sinistra 360° 116 149 215
 const int duranim[5] {600, 600, 700, 700, 250};
 byte r1 = 0x00;
 byte r2 = 0x00;
@@ -1126,26 +1135,26 @@ bool  Easyino_Robot::riceve_qualcosa() {
   else {
     switch (an) {
       case 0: {
-          r1 = 0x07;
-          r2 = 0x80;
-          registri();
-          break;
-        }
-      case 1: {
-          r1 = 0xE0;
-          r2 = 0x01;
-          registri();
-          break;
-        }
-      case 2: {
           r1 = 0x18;
           r2 = 0x00;
           registri();
           break;
         }
-      case 3: {
+      case 1: {
           r1 = 0x00;
           r2 = 0x7E;
+          registri();
+          break;
+        }
+      case 2: {
+          r1 = 0x07;
+          r2 = 0x80;
+          registri();
+          break;
+        }
+      case 3: {
+          r1 = 0xE0;
+          r2 = 0x01;
           registri();
           break;
         }
@@ -1154,12 +1163,7 @@ bool  Easyino_Robot::riceve_qualcosa() {
   return false;
 }
 
-#define ntessere 14
-int tag[3][ntessere] {  //avanti - indietro - destra - sinistra - luci_dx - luci_sx - luci_davanti - luci_dietro
-  {5, 119, 52, 213, 87, 165, 103, 36, 0, 148, 32, 216, 0, 71},
-  {7, 23, 197, 213, 7, 37, 196, 164, 24, 0, 181, 229, 132, 135},
-  {39, 247, 117, 21, 133, 20, 167, 0,}
-};
+
 int Easyino_Robot::codice_tessera() {
 
   // for (byte i = 0; i < uid.size; i++) {
@@ -1173,14 +1177,6 @@ int Easyino_Robot::codice_tessera() {
     for (int c = 0; c < ntessere; c++) {
       if (tag[r][c] == codice) {
         switch (c) {
-          case TARATURA: {
-              Serial.print("Tessera n° ");
-              Serial.print(codice);
-              Serial.print(" -> ");
-              Serial.println(c);
-              return c;
-              break;
-            }
           case TARAAVANTI: {
               Serial.print("Tessera n° ");
               Serial.print(codice);
@@ -1302,8 +1298,6 @@ void Easyino_Robot::giraDestraTaratura() {
 
 
 
-
-
 void animazione(int com, int durata, int vel) {
   if (com != -1) {
     int camb = lunghezza(com);
@@ -1319,13 +1313,22 @@ void animazione(int com, int durata, int vel) {
       }
       delay(1);
     }
-
   }
   else {
     delay(durata);
   }
-  spegni_led();
-  ferma_motori();
+  if (com != 4) {
+    spegni_led();
+    ferma_motori();
+  }
+  else {
+    r1 = 0;
+    r2 = 0;
+    registri();
+    v = 0;
+  }
+  Serial.print("Animazione n° ");
+  Serial.println(an);
 }
 void Easyino_Robot::accendiFrecciaDestra() {
   an = 0;
@@ -1340,8 +1343,7 @@ void Easyino_Robot::luciPosteriori() {
   an = 3;
 }
 void Easyino_Robot::animazioneTagRiconosciuto(int cicli) {
-  an = 4;
-  animazione(an, duranim[an], duranim[an * cicli]);
+  animazione(4, duranim[4], duranim[4]* cicli);
 }
 void Easyino_Robot::animazioneTagRiconosciuto() {
   animazioneTagRiconosciuto(1);
@@ -1355,7 +1357,6 @@ void Easyino_Robot::vaiAvanti(int centimetri) {
   digitalWrite(A3, LOW);
   digitalWrite(A2, HIGH);
   digitalWrite(A4, LOW);
-
   analogWrite(3, kdx); // Ruota destra
   analogWrite(6, ksx); // Ruota sinistra
   animazione(an, (int)(kcm * centimetri ), duranim[an]);

@@ -19,8 +19,8 @@ enum vari_robot {
   luigi3 = 3
 };
 enum modalita{
-  difficile = 0,
-  facile = 1
+  difficile,
+  facile
 };
 
 enum tessere {
@@ -32,8 +32,9 @@ enum tessere {
   LUCI_POSTERIORI,
   FRECCIA_DESTRA,
   FRECCIA_SINISTRA,
-  COMANDO_NON_DEFINITO,
-  TARATURA,
+  DESTRA_45,
+  SINISTRA_45,
+  GIRO_COMPLETO,
   TARAAVANTI,
   TARAGIRA,
   PIUDESTRA,
